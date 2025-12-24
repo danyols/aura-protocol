@@ -10,10 +10,10 @@
 ---
 
 ### ARQ (Automatic Repeat Request)
-A strategy for reliability: if you don't get an ACK, send again.
+A strategy for reliability: if don't get an ACK, send again.
 
 ### Why UDP Instead of TCP?
 - **TCP:** Reliable but heavy, causes "head-of-line blocking" (one lost packet freezes everything)
 - **UDP:** Lightweight, low latency, but no built-in reliability
-- **Our approach:** UDP + custom ARQ = we control exactly what gets retried vs dropped
+- **My approach:** UDP + custom ARQ = we control exactly what gets retried vs dropped
 
