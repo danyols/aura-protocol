@@ -17,7 +17,7 @@ int main() {
     memset(&server_addr, 0, sizeof(server_addr)); // filling every byte of server_addr with 0's
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", ) // localhost
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr); // localhost
 
     const char* msg = "hello from client";   
     sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
