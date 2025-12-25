@@ -21,7 +21,7 @@ int main() {
 
     const char* msg = "hello from client";   
     sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    // IPv4 specific
+    // it's IPv4 specific
     std::cout << "Sent: " << msg << "\n";
 
     close(sock);
