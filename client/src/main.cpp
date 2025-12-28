@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <chrono>
+#include <cstdint>
 
 // configuration
 const char* SERVER_IP = "127.0.0.1";
@@ -15,14 +17,21 @@ const uint8_t TYPE_CMD = 0x03;
 
 // remove the extra padding
 #pragma pack(push, 1)
+// start packing with 1 byte-alignment
 struct PacketHeader {
     uint32_t packet_id; // 4 bytes, which packet
     uint64_t timestamp; // 8 bytes, when sent
     uint8_t type; // 1 byte, either DATA, ACK OR CMD
+    // total of 13 bytes
 };
-#pragma pack(pop)
+#pragma pack(pop) // telling compiler to go back to normal
 
-
+uint64_t now_ms() {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(
+        system_clock::now().time_since_eopch() // time since 1970
+    ).count() // extract number from duration object
+}
 
 int main() {
     // UDP socket
@@ -31,7 +40,7 @@ int main() {
         std::cerr << "Failed to create socket\n";
         return 1;
     }
-    std::cout << "Socket created\n";
+    // std::cout << "Socket created\n";
 
     struct sockaddr_in server_addr; // address label
     memset(&server_addr, 0, sizeof(server_addr)); // filling every byte of server_addr with 0's
