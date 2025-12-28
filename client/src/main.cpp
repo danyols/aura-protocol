@@ -8,7 +8,8 @@
 
 // configuration
 const char* SERVER_IP = "127.0.0.1";
-const int SERVER_PORT = 8080
+const int SERVER_PORT = 8080;
+const size_t BUFFER_SIZE = 256; // small, changeable
 
 // different packet types
 const uint8_t TYPE_DATA = 0x01;
@@ -33,7 +34,7 @@ uint64_t now_ms() {
     ).count() // extract number from duration object
 }
 
-const size_t MAX_PAYLOAD_SIZE = buffer - sizeof(PacketHeader);
+const size_t MAX_PAYLOAD_SIZE = BUFFER_SIZE - sizeof(PacketHeader);
 
 int main() {
     // UDP socket
@@ -58,7 +59,17 @@ int main() {
 
     // real-life example here
     const char *payload = "{\"temp\": 36.5, \"hr\": 72}"; // going to use json format
-    size_t payload_len = sizeof(payload);
+    size_t payload_len = strlen(payload);
+
+    // to watch out for buffer overflow
+    // using small buffer size for now
+    if (payload_len > MAX_PAYLOAD_SIZE) {
+        std::cerr << "Error: The payload is too large (it's" << payload_len << " bytes, but max is " << MAX_PAYLOAD_SIZE << ")\n";
+        close(sock);
+        return 1;
+    }
+
+    char buffer[BUFFER_SIZE];
 
     const char* msg = "hello from client";   
     sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
