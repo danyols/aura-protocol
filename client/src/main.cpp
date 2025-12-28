@@ -4,6 +4,26 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
+// configuration
+const char* SERVER_IP = "127.0.0.1";
+const int SERVER_PORT = 8080
+
+// different packet types
+const uint8_t TYPE_DATA = 0x01;
+const uint8_t TYPE_ACK = 0x02;
+const uint8_t TYPE_CMD = 0x03;
+
+// remove the extra padding
+#pragma pack(push, 1)
+struct PacketHeader {
+    uint32_t packet_id; // 4 bytes, which packet
+    uint64_t timestamp; // 8 bytes, when sent
+    uint8_t type; // 1 byte, either DATA, ACK OR CMD
+};
+#pragma pack(pop)
+
+
+
 int main() {
     // UDP socket
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
