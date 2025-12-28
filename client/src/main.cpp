@@ -33,6 +33,8 @@ uint64_t now_ms() {
     ).count() // extract number from duration object
 }
 
+const size_t MAX_PAYLOAD_SIZE = buffer - sizeof(PacketHeader);
+
 int main() {
     // UDP socket
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -45,8 +47,18 @@ int main() {
     struct sockaddr_in server_addr; // address label
     memset(&server_addr, 0, sizeof(server_addr)); // filling every byte of server_addr with 0's
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr); // localhost
+    server_addr.sin_port = htons(SERVER_PORT);
+    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr); // localhost
+
+    // constructing the packet
+    PacketHeader header;
+    header.packet_id = 1;
+    header.timestamp = now_ms();
+    header_type = TYPE_DATA;
+
+    // real-life example here
+    const char *payload = "{\"temp\": 36.5, \"hr\": 72}"; // going to use json format
+    size_t payload_len = sizeof(payload);
 
     const char* msg = "hello from client";   
     sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
