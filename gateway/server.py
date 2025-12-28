@@ -1,5 +1,6 @@
 import socket
 import struct
+import time
 
 # CONFIG
 HOST = '127.0.0.1'
@@ -38,6 +39,8 @@ def main():
 
     while True:
         data, client_addr = sock.recvfrom(1024) # just a small msg for now
+        # WHO SENT
+        # client_addr says packet came from IP on random port
 
         # message = data.decode('utf-8')
         # print(f"[RECV] From {client_addr}: {message}")
@@ -61,6 +64,12 @@ def main():
         print(f"Timestamp: {timestamp}")
         print(f"Type: {pkt_type}")
         print(f"Payload: {payload}")
+        print()
+
+        # === pack back up to send ACK back ===
+        ack_header = struct.pack(HEADER_FORMAT, packet_id, timestamp, TYPE_ACK)
+        sock.sendto(ack_header, client_addr)
+        print(f"[Sent ACK for packet #{packet_id}]") 
         print()
 
 if __name__ == "__main__":
