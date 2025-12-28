@@ -17,8 +17,8 @@ const uint8_t TYPE_ACK = 0x02;
 const uint8_t TYPE_CMD = 0x03;
 
 // remove the extra padding
-#pragma pack(push, 1)
 // start packing with 1 byte-alignment
+#pragma pack(push, 1)
 struct PacketHeader {
     uint32_t packet_id; // 4 bytes, which packet
     uint64_t timestamp; // 8 bytes, when sent
@@ -30,13 +30,14 @@ struct PacketHeader {
 uint64_t now_ms() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(
-        system_clock::now().time_since_eopch() // time since 1970
-    ).count() // extract number from duration object
+        system_clock::now().time_since_epoch() // time since 1970
+    ).count(); // extract number from duration object
 }
 
 const size_t MAX_PAYLOAD_SIZE = BUFFER_SIZE - sizeof(PacketHeader);
 
 int main() {
+    
     // UDP socket
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -55,7 +56,7 @@ int main() {
     PacketHeader header;
     header.packet_id = 1;
     header.timestamp = now_ms();
-    header_type = TYPE_DATA;
+    header.type = TYPE_DATA;
 
     // real-life example here
     const char *payload = "{\"temp\": 36.5, \"hr\": 72}"; // going to use json format
@@ -64,18 +65,33 @@ int main() {
     // to watch out for buffer overflow
     // using small buffer size for now
     if (payload_len > MAX_PAYLOAD_SIZE) {
-        std::cerr << "Error: The payload is too large (it's" << payload_len << " bytes, but max is " << MAX_PAYLOAD_SIZE << ")\n";
+        std::cerr << "Error: The payload is too large (it's " << payload_len << " bytes, but max is " << MAX_PAYLOAD_SIZE << ")\n";
         close(sock);
         return 1;
     }
 
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE]; // wtv I sent constant to
+    memcpy(buffer, &header, sizeof(header));
+    memcpy(buffer + sizeof(header), payload, payload_len);
 
-    const char* msg = "hello from client";   
-    sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    // it's IPv4 specific
-    std::cout << "Sent: " << msg << "\n";
+    size_t total_size = sizeof(header) + payload_len;
+
+    std::cout << "Sending packet #" << header.packet_id << " (" << total_size << " bytes)" << std::endl;
+    ssize_t sent = sendto(sock, buffer, total_size, 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    // store as a signed value, in case of error
+
+    if (sent < 0) {
+        std::cerr << "Failed to send packet\n";
+        close(sock);
+        return 1;
+    }
+
+    // const char* msg = "hello from client";   
+    // sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    // // it's IPv4 specific
+    // std::cout << "Sent: " << msg << "\n";
 
     close(sock);
+    std::cout << "Done\n";
     return 0;
 }
