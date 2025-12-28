@@ -33,12 +33,35 @@ def main():
     # bind to address, listen on this port
     sock.bind((HOST, PORT))
     print(f"[Gateway] Listening on {HOST}:{PORT}")
+    print(f"[Gateway] Header size: {HEADER_SIZE} bytes")
+    print()
 
     while True:
         data, client_addr = sock.recvfrom(1024) # just a small msg for now
 
-        message = data.decode('utf-8')
-        print(f"[RECV] From {client_addr}: {message}")
+        # message = data.decode('utf-8')
+        # print(f"[RECV] From {client_addr}: {message}")
+        print(f"[Received] {len(data)} bytes from {client_addr}")
+
+        if len(data) < HEADER_SIZE:
+            print(f"Error: Packet too small ({len(data)}) bytes, need {HEADER_SIZE}")
+            continue
+
+        # split between the header and payload
+        header_bytes = data[:HEADER_SIZE]
+        payload_bytes = data[HEADER_SIZE:]
+
+        # bytes to python numbers
+        packet_id, timestamp, pkt_type = struct.unpack(HEADER_FORMAT, header_bytes)
+
+        # bytes to text string
+        payload = payload_bytes.decode('utf-8')
+
+        print(f"Packet ID: {packet_id}")
+        print(f"Timestamp: {timestamp}")
+        print(f"Type: {pkt_type}")
+        print(f"Payload: {payload}")
+        print()
 
 if __name__ == "__main__":
     main()
