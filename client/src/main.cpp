@@ -8,8 +8,10 @@
 
 // configuration
 const char* SERVER_IP = "127.0.0.1";
-const int SERVER_PORT = 8080;
+const int SERVER_PORT = 8080; // SERVER PORT, NOT THE CLIENT
 const size_t BUFFER_SIZE = 256; // small, changeable
+const int TIMEOUT_MS = 200;
+const int MAX_RETRIES = 5;
 
 // different packet types
 const uint8_t TYPE_DATA = 0x01;
@@ -46,6 +48,12 @@ int main() {
     }
     // std::cout << "Socket created\n";
 
+    // set receive timeout so recvfrom (in the server) doesn't block forever
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = TIMEOUT_MS * 1000; // converting ms to microseconds
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
     struct sockaddr_in server_addr; // address label
     memset(&server_addr, 0, sizeof(server_addr)); // filling every byte of server_addr with 0's
     server_addr.sin_family = AF_INET;
@@ -70,7 +78,7 @@ int main() {
         return 1;
     }
 
-    char buffer[BUFFER_SIZE]; // wtv I sent constant to
+    char buffer[BUFFER_SIZE]; // whatever I sent constant to
     memcpy(buffer, &header, sizeof(header));
     memcpy(buffer + sizeof(header), payload, payload_len);
 
@@ -92,6 +100,6 @@ int main() {
     // std::cout << "Sent: " << msg << "\n";
 
     close(sock);
-    std::cout << "Done\n";
+    std::cout << "Done!\n";
     return 0;
 }
