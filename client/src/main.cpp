@@ -46,7 +46,6 @@ int main() {
         std::cerr << "Failed to create socket\n";
         return 1;
     }
-    // std::cout << "Socket created\n";
 
     // set receive timeout so recvfrom (in the server) doesn't block forever
     struct timeval timeout;
@@ -85,10 +84,10 @@ int main() {
     size_t total_size = sizeof(header) + payload_len;
 
     std::cout << "Sending packet #" << header.packet_id << " (" << total_size << " bytes)" << std::endl;
-    // ssize_t sent = sendto(sock, buffer, total_size, 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    // store as a signed value, in case of error
 
-    // retry loop
+    // ssize_t is for storing as a signed value, in case of error
+
+    // ARQ retry loop
     bool ack_received = false;
     int retries = 0;
     while (!ack_received && retries < MAX_RETRIES) {
