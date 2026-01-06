@@ -1,10 +1,13 @@
 import socket
 import struct
 import time
+import random
 
 # CONFIG
 HOST = '127.0.0.1'
 PORT = 8080
+# to simulate packet loss:
+DROP_CHANCE = 0.3
 
 # packet format that has to match C++ struct
 # < means little-endian, CPU and C++ struct is like this
@@ -45,6 +48,12 @@ def main():
         # message = data.decode('utf-8')
         # print(f"[RECV] From {client_addr}: {message}")
         print(f"[Received] {len(data)} bytes from {client_addr}")
+
+        # Chaos engine
+        if random.random() < DROP_CHANCE:
+            print(f"[CHAOS] Dropped packet!")
+            print()
+            continue
 
         if len(data) < HEADER_SIZE:
             print(f"Error: Packet too small ({len(data)}) bytes, need {HEADER_SIZE}")
