@@ -15,7 +15,7 @@ TCP is reliable but introduces these problems for real-time IoT:
 
 With UDP + custom ARQ, I control exactly what gets retransmitted. Old sensor readings can be dropped, but critical commands must be delivered.
 
-## Architecture (fow now)
+## Architecture (for now)
 
 ```
 ┌─────────────────┐         UDP + ARQ         ┌─────────────────┐
