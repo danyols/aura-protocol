@@ -85,14 +85,44 @@ int main() {
     size_t total_size = sizeof(header) + payload_len;
 
     std::cout << "Sending packet #" << header.packet_id << " (" << total_size << " bytes)" << std::endl;
-    ssize_t sent = sendto(sock, buffer, total_size, 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    // ssize_t sent = sendto(sock, buffer, total_size, 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
     // store as a signed value, in case of error
 
-    if (sent < 0) {
-        std::cerr << "Failed to send packet\n";
-        close(sock);
-        return 1;
+    // retry loop
+    bool ack_received = false;
+    int retries = 0;
+    while (!ack_received && retries < MAX_RETRIES) {
+        // while NOT received ACK, keep looping
+        sendto(sock, buffer, total_size, 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
+        ssize_t received = recvfrom(sock, buffer, BUFFER_SIZE, 0, nullptr, nullptr);
+
+        if (received > 0) {
+            // big enough to be header?
+            if (received >= sizeof(PacketHeader)) {
+
+                PacketHeader ack_header;
+                memcpy(&ack_header, buffer, sizeof(PacketHeader));
+
+                // match the packets
+                if (ack_header.type == TYPE_ACK && ack_header.packet_id == header.packet_id) {
+                    ack_received = true;
+                    std::cout << "ACK received!\n";
+                }
+        }
+        // if this check fails, ack_received is not set, so loop continues
+
+        } else {
+            retries++;
+            std::cout << "Timeout, retry " << retries << "/" << MAX_RETRIES << "\n";
+        }
     }
+
+    // if (sent < 0) {
+    //     std::cerr << "Failed to send packet\n";
+    //     close(sock);
+    //     return 1;
+    // }
 
     // const char* msg = "hello from client";   
     // sendto(sock, msg, strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
