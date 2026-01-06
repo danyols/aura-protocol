@@ -47,6 +47,7 @@ def main():
 
         # message = data.decode('utf-8')
         # print(f"[RECV] From {client_addr}: {message}")
+
         print(f"[Received] {len(data)} bytes from {client_addr}")
 
         # Chaos engine
