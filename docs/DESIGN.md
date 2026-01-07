@@ -58,8 +58,10 @@ Bytes 13+:   {"temp": 36.5, "hr": 72}  (UTF-8 payload)
 
 Considering approaches, throughput, how complex, and what I went with.
 
+```
 Stop-and-Wait: Lower throughput (idle while waiting) and simpler.
 Sliding Window: Higher throughput (pipeline packets), more complex (reordering, buffers), didn't go with this.
+```
 
 **Rationale:** For low-frequency IoT telemetry (1-10 packets/sec), Stop-and-Wait is sufficient. The simplicity reduces bugs and is appropriate.
 
