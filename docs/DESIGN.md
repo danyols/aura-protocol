@@ -24,10 +24,12 @@ Technical details of the protocol design, security considerations, and architect
 
 DATA packet with JSON payload:
 
+'''
 Bytes 0-3:   01 00 00 00        (packet_id = 1, little-endian)
 Bytes 4-11:  A0 1B 2C 8D 01 00 00 00  (timestamp)
 Byte 12:     01                 (type = DATA)
 Bytes 13+:   {"temp": 36.5, "hr": 72}  (UTF-8 payload)
+'''
 
 ## Security Considerations
 
@@ -56,6 +58,7 @@ Bytes 13+:   {"temp": 36.5, "hr": 72}  (UTF-8 payload)
 
 Considering approaches, throughput, how complex, and what I went with.
 
+|----------|------------|------------|--------|
 | Stop-and-Wait | Lower (idle while waiting) | Simple | Yes |
 | Sliding Window | Higher (pipeline packets) | Complex (reordering, buffers) | No |
 
